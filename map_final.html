@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script
+src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDjPkMbayn73tp7iJTrllzCo5vRTX8COTc">
+</script>
+
+<script>
+    $(function(){
+             var trip_id;
+             var lati = [];
+             var longi =[];
+             var allLatlng = []; 
+             var allMarkers = [];
+             var infowindow = null;
+              var pos;
+              var userCords;
+              var tempMarkerHolder = [];
+
+              var mapOptions = {                        
+                  zoom: 5,
+                  center: new google.maps.LatLng(20.593684, 78.96288),
+                  panControl: false,
+                  panControlOptions: {
+                    position: google.maps.ControlPosition.BOTTOM_LEFT
+                  },
+                  zoomControl: true,
+                  zoomControlOptions: {
+                    style: google.maps.ZoomControlStyle.LARGE,
+                    position: google.maps.ControlPosition.RIGHT_CENTER
+                  },
+                  scaleControl: false
+
+                };
+
+                map = new google.maps.Map(document.getElementById('googleMap'), mapOptions);
+
+			       
+
+             /* function show(s){                            // code to send selected trip_id to getid.php to    
+            var xmlhttp = new XMLHttpRequest();              // get location data from the database 
+              xmlhttp.onreadystatechange = function() {
+                        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                              //trip_id = xmlhttp.responseText;
+                        }
+                    };
+                    xmlhttp.open("GET", "gethint.php?q="+s, true);
+                    xmlhttp.send();
+                  };*/                                           // unfortunately this script not working 
+            
+
+                /* call the php that has the php array which is json_encoded */
+                $("button").click(function(){
+                  alert("ok");
+                $.getJSON('http://localhost/cubeinto/getid.php', function(data) {  // get json data of locations 
+                                                                                  //from getid.php 
+                		var response = JSON.stringify(data);
+                		var codes = jQuery.parseJSON(response);
+								console.log(codes);
+							$.each(codes, function (key, value) {
+							     lati.push(parseFloat(value.latitude));
+                   //alert(lati);
+							     longi.push(parseFloat(value.longitude));
+              }); 
+
+                for(var i=0; i<lati.length;i++)
+                {
+
+                    myLatlng = new google.maps.LatLng(lati[i],longi[i]);
+                  console.log(myLatlng);
+                   allMarkers = new google.maps.Marker({position: myLatlng, map: map});
+                   //put all lat long in array
+                     allLatlng.push(myLatlng);
+                
+                  //Put the marketrs in an array
+                   tempMarkerHolder.push(allMarkers);
+                }
+
+                  google.maps.event.addListener(allMarkers, 'click', function () {
+                  infowindow.setContent(this.html);
+                  infowindow.open(map, this);
+                });
+                
+                
+                //console.log(allLatlng);
+                //  Make an array of the LatLng's of the markers you want to show
+                //  Create a new viewpoint bound
+                var bounds = new google.maps.LatLngBounds ();
+                //  Go through each...
+                for (var i = 0, LtLgLen = allLatlng.length; i < LtLgLen; i++) {
+                  //  And increase the bounds to take this point
+                  bounds.extend (allLatlng[i]);
+                }
+                //  Fit these bounds to the map
+                map.fitBounds (bounds);
+
+
+
+             });
+                });
+            });
+
+      
+</script>
+
+</head>
+<body>
+<button> show</button>
+<form>
+<select id="trip_id">
+  <option value="">Select a trip Id:</option>
+  <option value="1">M-1468692028-00</option>
+  <option value="2">D-1468692028-20</option>
+  <option value="3">C-1468696026-21</option>
+</select>
+</form>
+<div id="googleMap" style="width:500px;height:380px;"></div>
+</body>
+</html>
